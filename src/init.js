@@ -68,7 +68,7 @@ export default () => {
 
   const state = onChange({
     form: {
-      processState: 'waiting',
+      processState: '',
       valid: '',
       error: '',
     },
