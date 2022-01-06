@@ -1,9 +1,9 @@
 {
   "name": "@hexlet/code",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "RSS aggregator",
   "scripts": {
-    "test": "jest --colors",
+    "test": "npx jest --bail",
     "build": "webpack"
   },
   "repository": {
@@ -25,7 +25,7 @@
   "devDependencies": {
     "@babel/core": "^7.15.5",
     "@babel/eslint-parser": "^7.15.4",
-    "@babel/preset-env": "^7.15.4",
+    "@babel/preset-env": "^7.16.7",
     "babel-jest": "^27.1.1",
     "babel-loader": "^8.2.2",
     "css-loader": "^6.2.0",
@@ -48,8 +48,10 @@
     "webpack-dev-server": "^4.1.1"
   },
   "dependencies": {
+    "axios": "^0.24.0",
     "bootstrap": "^5.1.3",
     "npm-check-updates": "^11.8.5",
+    "on-change": "^4.0.0",
     "sass": "^1.39.0",
     "sass-loader": "^12.1.0",
     "yup": "^0.32.11"
