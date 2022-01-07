@@ -19,7 +19,7 @@ const resources = {
 };
 
 const getValidator = () => {
-  const schema = yup.string().url('noValid')
+  const schema = yup.string().url('noValid');
   return (url, feeds) => schema.notOneOf(feeds, 'notOneOf').validateSync(url);
 };
 
@@ -46,7 +46,7 @@ export default () => i18next.init({
       submitButton: document.querySelector('button[type="submit"]'),
       feedback: document.querySelector('.feedback'),
       containerFeeds: document.querySelector('.container-xxl').querySelector('.feeds'),
-      };
+    };
 
     const watchedState = onChange(state, render(elements));
     const validate = getValidator();
@@ -55,7 +55,7 @@ export default () => i18next.init({
       e.preventDefault();
       const formData = new FormData(e.target);
       const url = formData.get('url');
-      
+
       try {
         validate(url, state.feeds.urls);
         watchedState.form.processState = 'sent';
