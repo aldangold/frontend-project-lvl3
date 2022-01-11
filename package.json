@@ -1,6 +1,6 @@
 {
   "name": "@hexlet/code",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "RSS aggregator",
   "scripts": {
     "test": "npx jest --bail",
@@ -23,8 +23,10 @@
   },
   "main": "src/init.js",
   "devDependencies": {
-    "@babel/core": "^7.15.5",
+    "@babel/cli": "^7.16.7",
+    "@babel/core": "^7.16.7",
     "@babel/eslint-parser": "^7.15.4",
+    "@babel/node": "^7.16.7",
     "@babel/preset-env": "^7.16.7",
     "babel-jest": "^27.1.1",
     "babel-loader": "^8.2.2",
