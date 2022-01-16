@@ -5,6 +5,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import render from './view';
 import parser from './parser';
+import 'bootstrap';
 
 const resources = {
   ru: {
@@ -18,6 +19,7 @@ const resources = {
       success: 'URL успешно загружен',
       feeds: 'Фиды',
       posts: 'Потоки',
+      review: 'Просмотр',
     },
   },
 };
@@ -45,9 +47,11 @@ const createDataFeed = (url, data, state) => {
   };
 
   const posts = data.items.map((post) => {
+    const postID = _.uniqueId();
     const channelID = id;
     const { title, description, link } = post;
     return {
+      id: postID,
       channelID,
       title,
       description,
@@ -66,6 +70,7 @@ const updateDataPosts = (id, data, state) => {
     const { title, description, link } = post;
 
     return {
+      id,
       channelID,
       title,
       description,
@@ -116,6 +121,8 @@ export default () => i18next.init({
         urls: [],
         channels: [],
         posts: [],
+        readed: [],
+        modal: null,
       },
     };
 
@@ -125,6 +132,9 @@ export default () => i18next.init({
       feedback: document.querySelector('.feedback'),
       containerFeeds: document.querySelector('.feeds'),
       containerPosts: document.querySelector('.posts'),
+      modalTitle: document.querySelector('.modal-title'),
+      modalBody: document.querySelector('.modal-body'),
+      fullArticle: document.querySelector('.full-article'),
     };
 
     const watchedState = onChange(state, render(elements));
@@ -158,6 +168,13 @@ export default () => i18next.init({
         watchedState.form.processState = 'error';
         watchedState.form.error = err.message;
       }
+    });
+
+    elements.containerPosts.addEventListener('click', (e) => {
+      const { id } = e.target.dataset;
+      const [reviewPost] = watchedState.feeds.posts.filter((p) => p.id === id);
+      watchedState.feeds.modal = reviewPost;
+      watchedState.feeds.readed.push(id);
     });
     setTimeout(() => updateFeeds(watchedState), 5000);
   });

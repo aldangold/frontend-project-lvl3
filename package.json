@@ -1,6 +1,6 @@
 {
   "name": "@hexlet/code",
-  "version": "0.3.0",
+  "version": "0.6.0",
   "description": "RSS aggregator",
   "scripts": {
     "test": "npx jest --bail",
@@ -16,12 +16,6 @@
     "url": "https://github.com/aldangold/frontend-project-lvl3/issues"
   },
   "homepage": "https://github.com/aldangold/frontend-project-lvl3#readme",
-  "jest": {
-    "verbose": true,
-    "testURL": "http://localhost/",
-    "testEnvironment": "jsdom"
-  },
-  "main": "src/init.js",
   "devDependencies": {
     "@babel/cli": "^7.16.7",
     "@babel/core": "^7.16.7",

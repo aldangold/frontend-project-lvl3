@@ -4,6 +4,7 @@ import _ from 'lodash';
 const renderError = (elements, processErrors) => {
   elements.feedback.classList.add('text-danger');
   elements.inputField.classList.add('is-invalid');
+  elements.inputField.value = null;
   elements.inputField.focus();
   elements.feedback.textContent = i18next.t(`errors.${processErrors}`);
 };
@@ -36,6 +37,25 @@ const initContainer = (elementName, nameContainer) => {
   elementName.append(divOuter);
 };
 
+const makeReaded = (id) => {
+  const link = document.querySelector(`[data-id="${id}"]`);
+  link.classList.remove('fw-bold');
+  link.classList.add('fw-normal');
+};
+
+const renderModal = (elements, value) => {
+  const {
+    id,
+    title,
+    description,
+    link,
+  } = value;
+  makeReaded(id);
+  elements.modalTitle.textContent = title;
+  elements.modalBody.textContent = description;
+  elements.fullArticle.setAttribute('href', link);
+};
+
 const getDifferent = (value, preValue) => {
   const diff = _.differenceWith(
     value, preValue, (a, b) => a.title === b.title,
@@ -43,7 +63,7 @@ const getDifferent = (value, preValue) => {
   return diff;
 };
 
-const addChannel = (elements, value, preValue) => {
+const renderChannel = (elements, value, preValue) => {
   const newChannels = getDifferent(value, preValue);
   const ul = elements.containerFeeds.querySelector('.list-group');
   newChannels.reverse().forEach((channel) => {
@@ -64,21 +84,31 @@ const addChannel = (elements, value, preValue) => {
   });
 };
 
-const addPosts = (elements, value, preValue) => {
+const renderPosts = (elements, value, preValue) => {
   const newPosts = getDifferent(value, preValue);
   const ul = elements.containerPosts.querySelector('.list-group');
   newPosts.reverse().forEach((post) => {
+    const { id, title } = post;
+    const button = document.createElement('button');
     const li = document.createElement('li');
     const a = document.createElement('a');
 
-    a.textContent = post.title;
+    a.textContent = title;
+    button.textContent = i18next.t('review');
 
+    button.setAttribute('type', 'button');
+    button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+    button.dataset.id = id;
+    button.dataset.bsToggle = 'modal';
+    button.dataset.bsTarget = '#modal';
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
     a.classList.add('fw-bold');
+    a.dataset.id = id;
     a.setAttribute('href', post.link);
     a.setAttribute('target', '_blank');
 
     li.append(a);
+    li.append(button);
     ul.prepend(li);
   });
 };
@@ -119,11 +149,15 @@ const render = (elements) => (path, value, preValue) => {
       break;
 
     case 'feeds.channels':
-      addChannel(elements, value, preValue);
+      renderChannel(elements, value, preValue);
       break;
 
     case 'feeds.posts':
-      addPosts(elements, value, preValue);
+      renderPosts(elements, value, preValue);
+      break;
+
+    case 'feeds.modal':
+      renderModal(elements, value);
       break;
 
     default:
