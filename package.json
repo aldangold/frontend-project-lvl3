@@ -16,6 +16,7 @@
     "url": "https://github.com/aldangold/frontend-project-lvl3/issues"
   },
   "homepage": "https://github.com/aldangold/frontend-project-lvl3#readme",
+  "main": "src/init.js",
   "devDependencies": {
     "@babel/cli": "^7.16.7",
     "@babel/core": "^7.16.7",
