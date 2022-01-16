@@ -1,4 +1,5 @@
 import i18next from 'i18next';
+import _ from 'lodash';
 
 const renderError = (elements, processErrors) => {
   elements.feedback.classList.add('text-danger');
@@ -35,32 +36,46 @@ const initContainer = (elementName, nameContainer) => {
   elementName.append(divOuter);
 };
 
-const addFeed = (elements, title, description) => {
-  const ul = elements.containerFeeds.querySelector('.list-group');
-  const li = document.createElement('li');
-  const h3 = document.createElement('h3');
-  const p = document.createElement('p');
-
-  h3.textContent = title;
-  p.textContent = description;
-  li.classList.add('list-group-item', 'border-0', 'border-end-0');
-  h3.classList.add('h6', 'm-0');
-  p.classList.add('m-0', 'small', 'text-black-50');
-
-  h3.append(p);
-  li.append(h3);
-  ul.prepend(li);
+const getDifferent = (value, preValue) => {
+  const diff = _.differenceWith(
+    value, preValue, (a, b) => a.title === b.title,
+  );
+  return diff;
 };
 
-const addPost = (elements, items) => {
+const addChannel = (elements, value, preValue) => {
+  const newChannels = getDifferent(value, preValue);
+  const ul = elements.containerFeeds.querySelector('.list-group');
+  newChannels.reverse().forEach((channel) => {
+    const li = document.createElement('li');
+    const h3 = document.createElement('h3');
+    const p = document.createElement('p');
+
+    h3.textContent = channel.title;
+    p.textContent = channel.description;
+
+    li.classList.add('list-group-item', 'border-0', 'border-end-0');
+    h3.classList.add('h6', 'm-0');
+    p.classList.add('m-0', 'small', 'text-black-50');
+
+    h3.append(p);
+    li.append(h3);
+    ul.prepend(li);
+  });
+};
+
+const addPosts = (elements, value, preValue) => {
+  const newPosts = getDifferent(value, preValue);
   const ul = elements.containerPosts.querySelector('.list-group');
-  items.forEach((item) => {
+  newPosts.reverse().forEach((post) => {
     const li = document.createElement('li');
     const a = document.createElement('a');
-    a.textContent = item.title;
+
+    a.textContent = post.title;
+
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
     a.classList.add('fw-bold');
-    a.setAttribute('href', item.link);
+    a.setAttribute('href', post.link);
     a.setAttribute('target', '_blank');
 
     li.append(a);
@@ -68,15 +83,9 @@ const addPost = (elements, items) => {
   });
 };
 
-export const renderRSS = (elements, data) => {
-  const { feedTitle, feedDescription, items } = data;
-  addFeed(elements, feedTitle, feedDescription);
-  addPost(elements, items);
-};
-
 const handleProcessState = (elements, processState) => {
   switch (processState) {
-    case 'sent':
+    case 'success':
       renderSuccess(elements);
       break;
 
@@ -84,7 +93,7 @@ const handleProcessState = (elements, processState) => {
       elements.feedback.classList.remove('text-success');
       break;
 
-    case 'init':
+    case true:
       initContainer(elements.containerFeeds, 'feeds');
       initContainer(elements.containerPosts, 'posts');
       break;
@@ -95,7 +104,7 @@ const handleProcessState = (elements, processState) => {
   }
 };
 
-const render = (elements) => (path, value) => {
+const render = (elements) => (path, value, preValue) => {
   switch (path) {
     case 'form.processState':
       handleProcessState(elements, value);
@@ -105,8 +114,16 @@ const render = (elements) => (path, value) => {
       renderError(elements, value);
       break;
 
-    case 'feeds.processState':
+    case 'feeds.init':
       handleProcessState(elements, value);
+      break;
+
+    case 'feeds.channels':
+      addChannel(elements, value, preValue);
+      break;
+
+    case 'feeds.posts':
+      addPosts(elements, value, preValue);
       break;
 
     default:

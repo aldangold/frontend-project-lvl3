@@ -2,7 +2,9 @@ import * as yup from 'yup';
 import i18next from 'i18next';
 import onChange from 'on-change';
 import axios from 'axios';
-import render, { renderRSS } from './view';
+import _ from 'lodash';
+import render from './view';
+import parser from './parser';
 
 const resources = {
   ru: {
@@ -32,29 +34,69 @@ const getProxyUrl = (url) => {
   return proxyUrl.toString();
 };
 
-const parseContent = (rssContent) => {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(rssContent, 'application/xml');
+const createDataFeed = (url, data, state) => {
+  const { feeds } = state;
+  const id = _.uniqueId();
+  const channel = {
+    id,
+    url,
+    title: data.title,
+    description: data.description,
+  };
 
-  const error = doc.querySelector('parserError');
-  if (error) {
-    throw new Error(error.textContent);
-  }
-
-  const feedTitle = doc.querySelector('title').textContent;
-  const feedDescription = doc.querySelector('description').textContent;
-
-  const postElements = Array.from(doc.querySelectorAll('item'));
-  const items = postElements.map((item) => {
-    const title = item.querySelector('title').textContent;
-    const description = item.querySelector('description').textContent;
-    const link = item.querySelector('link').textContent;
+  const posts = data.items.map((post) => {
+    const channelID = id;
+    const { title, description, link } = post;
     return {
-      title, description, link,
+      channelID,
+      title,
+      description,
+      link,
     };
   });
 
-  return { feedTitle, feedDescription, items };
+  feeds.urls.unshift(url);
+  feeds.channels.unshift(channel);
+  feeds.posts.unshift(...posts);
+};
+
+const updateDataPosts = (id, data, state) => {
+  const posts = data.map((post) => {
+    const channelID = id;
+    const { title, description, link } = post;
+
+    return {
+      channelID,
+      title,
+      description,
+      link,
+    };
+  });
+  state.feeds.posts.unshift(...posts);
+};
+
+const updateFeeds = (state) => {
+  const promises = state.feeds.channels.map((channel) => axios.get(getProxyUrl(channel.url))
+    .then((response) => {
+      const { id } = channel;
+      const newPosts = parser(response.data.contents).items;
+      const oldPosts = state.feeds.posts.filter((p) => p.channelID === id);
+      const diffPosts = _.differenceWith(
+        newPosts, oldPosts, (a, b) => a.title === b.title,
+      );
+
+      if (diffPosts.length > 0) {
+        updateDataPosts(id, diffPosts, state);
+      }
+    })
+    .catch((err) => {
+      state.form.error = err;
+    }));
+  Promise.all(promises).finally(() => setTimeout(() => updateFeeds(state), 5000));
+};
+
+const addFeed = (url, dataFeed, state) => {
+  createDataFeed(url, dataFeed, state);
 };
 
 export default () => i18next.init({
@@ -69,8 +111,11 @@ export default () => i18next.init({
         error: '',
       },
       feeds: {
+        init: false,
         processState: '',
         urls: [],
+        channels: [],
+        posts: [],
       },
     };
 
@@ -92,13 +137,14 @@ export default () => i18next.init({
 
       try {
         validate(url, state.feeds.urls);
+        watchedState.feeds.init = true;
 
-        watchedState.feeds.processState = 'init';
         axios.get(getProxyUrl(url))
           .then((response) => {
-            renderRSS(elements, parseContent(response.data.contents));
-            watchedState.form.processState = 'sent';
-            watchedState.feeds.urls.push(url);
+            const dataFeed = parser(response.data.contents);
+            addFeed(url, dataFeed, watchedState);
+
+            watchedState.form.processState = 'success';
           })
           .catch((error) => {
             if (error.isAxiosError) {
@@ -113,4 +159,5 @@ export default () => i18next.init({
         watchedState.form.error = err.message;
       }
     });
+    setTimeout(() => updateFeeds(watchedState), 5000);
   });
