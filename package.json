@@ -1,10 +1,9 @@
 {
   "name": "@hexlet/code",
-  "version": "0.6.0",
+  "version": "1.0.0",
   "description": "RSS aggregator",
   "scripts": {
-    "test": "npx jest --bail",
-    "build": "webpack"
+    "test": "jest --colors"
   },
   "repository": {
     "type": "git",
@@ -12,6 +11,11 @@
   },
   "author": "aldangold <meloshnikoff@gmail.com>",
   "license": "ISC",
+  "jest": {
+    "verbose": true,
+    "testURL": "http://localhost/",
+    "testEnvironment": "jsdom"
+  },
   "bugs": {
     "url": "https://github.com/aldangold/frontend-project-lvl3/issues"
   },
