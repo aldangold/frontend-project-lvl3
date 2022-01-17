@@ -3,7 +3,7 @@ import i18next from 'i18next';
 import onChange from 'on-change';
 import axios from 'axios';
 import _ from 'lodash';
-import render from './view';
+import handler from './view';
 import parser from './parser';
 import 'bootstrap';
 
@@ -117,7 +117,6 @@ export default () => i18next.init({
       },
       feeds: {
         init: false,
-        processState: '',
         urls: [],
         channels: [],
         posts: [],
@@ -138,7 +137,7 @@ export default () => i18next.init({
       fullArticle: document.querySelector('.full-article'),
     };
 
-    const watchedState = onChange(state, render(elements));
+    const watchedState = onChange(state, handler(elements));
     const validate = getValidator();
 
     elements.form.addEventListener('submit', (e) => {

@@ -1,28 +1,7 @@
 import i18next from 'i18next';
 import _ from 'lodash';
 
-const renderError = (elements, processErrors) => {
-  elements.feedback.classList.add('text-danger');
-  elements.input.classList.add('is-invalid');
-  elements.input.value = null;
-  elements.input.focus();
-  elements.button.disabled = false;
-  elements.input.removeAttribute('readonly');
-  elements.feedback.textContent = i18next.t(`errors.${processErrors}`);
-};
-
-const renderSuccess = (elements) => {
-  elements.input.classList.remove('is-invalid');
-  elements.feedback.classList.remove('text-danger');
-  elements.input.value = '';
-  elements.input.focus();
-  elements.feedback.classList.add('text-success');
-  elements.feedback.textContent = i18next.t('success');
-  elements.button.disabled = false;
-  elements.input.removeAttribute('readonly');
-};
-
-const initContainer = (elementName, nameContainer) => {
+const renderContainer = (elementName, nameContainer) => {
   const divOuter = document.createElement('div');
   const divInner = document.createElement('div');
   const ul = document.createElement('ul');
@@ -117,10 +96,21 @@ const renderPosts = (elements, value, preValue) => {
   });
 };
 
+const renderError = (elements, processErrors) => {
+  elements.feedback.textContent = i18next.t(`errors.${processErrors}`);
+};
+
 const handleProcessState = (elements, processState) => {
   switch (processState) {
     case 'success':
-      renderSuccess(elements);
+      elements.input.classList.remove('is-invalid');
+      elements.feedback.classList.remove('text-danger');
+      elements.input.value = null;
+      elements.input.focus();
+      elements.feedback.classList.add('text-success');
+      elements.feedback.textContent = i18next.t('success');
+      elements.button.disabled = false;
+      elements.input.removeAttribute('readonly');
       break;
 
     case 'processing':
@@ -130,21 +120,24 @@ const handleProcessState = (elements, processState) => {
 
     case 'error':
       elements.feedback.classList.remove('text-success');
+      elements.feedback.classList.add('text-danger');
+      elements.input.classList.add('is-invalid');
+      elements.input.focus();
+      elements.button.disabled = false;
+      elements.input.removeAttribute('readonly');
       break;
 
     case true:
-      initContainer(elements.containerFeeds, 'feeds');
-      initContainer(elements.containerPosts, 'posts');
+      renderContainer(elements.containerFeeds, 'feeds');
+      renderContainer(elements.containerPosts, 'posts');
       break;
 
     default:
       break;
-      // https://ru.hexlet.io/blog/posts/sovershennyy-kod-defolty-v-svitchah
-      // throw new Error(`Unknown process state: ${processState}`);
   }
 };
 
-const render = (elements) => (path, value, preValue) => {
+const handler = (elements) => (path, value, preValue) => {
   switch (path) {
     case 'form.processState':
       handleProcessState(elements, value);
@@ -175,4 +168,4 @@ const render = (elements) => (path, value, preValue) => {
   }
 };
 
-export default render;
+export default handler;
