@@ -16,7 +16,7 @@ const resources = {
         dataError: 'Ресурс не содержит валидный RSS',
         networkError: 'Ошибка сети',
       },
-      success: 'URL успешно загружен',
+      success: 'RSS успешно загружен',
       feeds: 'Фиды',
       posts: 'Потоки',
       review: 'Просмотр',
