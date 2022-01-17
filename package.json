@@ -1,7 +1,7 @@
 {
   "name": "@hexlet/code",
   "version": "1.0.0",
-  "description": "RSS aggregator",
+  "description": "RSS reader",
   "scripts": {
     "test": "jest --colors"
   },

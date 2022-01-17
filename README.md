@@ -12,12 +12,11 @@
 	</a>
 </div>
 
-<h2>:bookmark_tabs: RSS Aggregator is an application that helps you stay up to date with RSS feeds.</h2>
+<h2>:bookmark_tabs: RSS Reader is a app for aggregating RSS feeds.</h2>
 	<p>With this application, it is convenient to read various sources, such as blogs. The application allows you to add an unlimited number of RSS feeds, update them and add new posts to the general feed on the fly.
 	</p>
 
 <h4>Click <a href="https://rss-aldangold.vercel.app">here</a> to try RSS Reader!</h4>
-<br>
 <h4>Additional information:</h4>
 <ul>
 	 <li> 
