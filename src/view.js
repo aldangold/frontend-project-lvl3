@@ -3,19 +3,23 @@ import _ from 'lodash';
 
 const renderError = (elements, processErrors) => {
   elements.feedback.classList.add('text-danger');
-  elements.inputField.classList.add('is-invalid');
-  elements.inputField.value = null;
-  elements.inputField.focus();
+  elements.input.classList.add('is-invalid');
+  elements.input.value = null;
+  elements.input.focus();
+  elements.button.disabled = false;
+  elements.input.removeAttribute('readonly');
   elements.feedback.textContent = i18next.t(`errors.${processErrors}`);
 };
 
 const renderSuccess = (elements) => {
-  elements.inputField.classList.remove('is-invalid');
+  elements.input.classList.remove('is-invalid');
   elements.feedback.classList.remove('text-danger');
-  elements.inputField.value = '';
-  elements.inputField.focus();
+  elements.input.value = '';
+  elements.input.focus();
   elements.feedback.classList.add('text-success');
   elements.feedback.textContent = i18next.t('success');
+  elements.button.disabled = false;
+  elements.input.removeAttribute('readonly');
 };
 
 const initContainer = (elementName, nameContainer) => {
@@ -119,6 +123,11 @@ const handleProcessState = (elements, processState) => {
       renderSuccess(elements);
       break;
 
+    case 'processing':
+      elements.input.setAttribute('readonly', 'readonly');
+      elements.button.disabled = true;
+      break;
+
     case 'error':
       elements.feedback.classList.remove('text-success');
       break;
@@ -129,8 +138,9 @@ const handleProcessState = (elements, processState) => {
       break;
 
     default:
+      break;
       // https://ru.hexlet.io/blog/posts/sovershennyy-kod-defolty-v-svitchah
-      throw new Error(`Unknown process state: ${processState}`);
+      // throw new Error(`Unknown process state: ${processState}`);
   }
 };
 

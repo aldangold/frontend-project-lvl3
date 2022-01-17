@@ -113,7 +113,7 @@ export default () => i18next.init({
     const state = {
       form: {
         processState: '',
-        error: '',
+        error: null,
       },
       feeds: {
         init: false,
@@ -128,7 +128,8 @@ export default () => i18next.init({
 
     const elements = {
       form: document.querySelector('.rss-form'),
-      inputField: document.getElementById('url-input'),
+      input: document.getElementById('url-input'),
+      button: document.querySelector('[type="submit"]'),
       feedback: document.querySelector('.feedback'),
       containerFeeds: document.querySelector('.feeds'),
       containerPosts: document.querySelector('.posts'),
@@ -148,6 +149,8 @@ export default () => i18next.init({
       try {
         validate(url, state.feeds.urls);
         watchedState.feeds.init = true;
+        watchedState.form.error = null;
+        watchedState.form.processState = 'processing';
 
         axios.get(getProxyUrl(url))
           .then((response) => {
