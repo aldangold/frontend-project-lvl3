@@ -1,61 +1,47 @@
 import i18next from 'i18next';
-import _ from 'lodash';
 
-const renderContainer = (elementName, nameContainer) => {
+const renderReaded = (data) => {
+  const readedPosts = data.filter((p) => p.readed === true);
+  readedPosts.forEach((item) => {
+    const id = item.postId;
+    const link = document.querySelector(`[data-id="${id}"]`);
+    link.classList.remove('fw-bold');
+    link.classList.add('fw-normal');
+  });
+};
+
+const renderModal = (elements, value) => {
+  const {
+    title,
+    description,
+    link,
+  } = value;
+  elements.modalTitle.textContent = title;
+  elements.modalBody.textContent = description;
+  elements.fullArticle.setAttribute('href', link);
+};
+
+const renderFeeds = (elements, feeds) => {
+  elements.containerFeeds.innerHTML = null;
   const divOuter = document.createElement('div');
   const divInner = document.createElement('div');
   const ul = document.createElement('ul');
   const h2 = document.createElement('h2');
 
-  h2.textContent = i18next.t(nameContainer);
+  h2.textContent = i18next.t('feeds');
 
   h2.classList.add('card-title', 'h4');
   divInner.classList.add('card-body');
   divOuter.classList.add('card', 'border-0');
   ul.classList.add('list-group', 'border-0', 'rounded-0');
 
-  divInner.append(h2);
-  divOuter.append(divInner);
-  divOuter.append(ul);
-  elementName.append(divOuter);
-};
-
-const makeReaded = (id) => {
-  const link = document.querySelector(`[data-id="${id}"]`);
-  link.classList.remove('fw-bold');
-  link.classList.add('fw-normal');
-};
-
-const renderModal = (elements, value) => {
-  const {
-    id,
-    title,
-    description,
-    link,
-  } = value;
-  makeReaded(id);
-  elements.modalTitle.textContent = title;
-  elements.modalBody.textContent = description;
-  elements.fullArticle.setAttribute('href', link);
-};
-
-const getDifferent = (value, preValue) => {
-  const diff = _.differenceWith(
-    value, preValue, (a, b) => a.title === b.title,
-  );
-  return diff;
-};
-
-const renderChannel = (elements, value, preValue) => {
-  const newChannels = getDifferent(value, preValue);
-  const ul = elements.containerFeeds.querySelector('.list-group');
-  newChannels.reverse().forEach((channel) => {
+  feeds.forEach((feed) => {
     const li = document.createElement('li');
     const h3 = document.createElement('h3');
     const p = document.createElement('p');
 
-    h3.textContent = channel.title;
-    p.textContent = channel.description;
+    h3.textContent = feed.title;
+    p.textContent = feed.description;
 
     li.classList.add('list-group-item', 'border-0', 'border-end-0');
     h3.classList.add('h6', 'm-0');
@@ -65,12 +51,28 @@ const renderChannel = (elements, value, preValue) => {
     li.append(h3);
     ul.prepend(li);
   });
+
+  divInner.append(h2);
+  divOuter.append(divInner);
+  divOuter.append(ul);
+  elements.containerFeeds.append(divOuter);
 };
 
-const renderPosts = (elements, value, preValue) => {
-  const newPosts = getDifferent(value, preValue);
-  const ul = elements.containerPosts.querySelector('.list-group');
-  newPosts.reverse().forEach((post) => {
+const renderPosts = (elements, posts) => {
+  elements.containerPosts.innerHTML = null;
+  const divOuter = document.createElement('div');
+  const divInner = document.createElement('div');
+  const ul = document.createElement('ul');
+  const h2 = document.createElement('h2');
+
+  h2.textContent = i18next.t('posts');
+
+  h2.classList.add('card-title', 'h4');
+  divInner.classList.add('card-body');
+  divOuter.classList.add('card', 'border-0');
+  ul.classList.add('list-group', 'border-0', 'rounded-0');
+
+  posts.forEach((post) => {
     const { id, title } = post;
     const button = document.createElement('button');
     const li = document.createElement('li');
@@ -94,10 +96,15 @@ const renderPosts = (elements, value, preValue) => {
     li.append(button);
     ul.prepend(li);
   });
+
+  divInner.append(h2);
+  divOuter.append(divInner);
+  divOuter.append(ul);
+  elements.containerPosts.append(divOuter);
 };
 
-const renderError = (elements, processErrors) => {
-  elements.feedback.textContent = i18next.t(`errors.${processErrors}`);
+const renderMessage = (elements, message) => {
+  elements.feedback.textContent = i18next.t(`messages.${message}`);
 };
 
 const handleProcessState = (elements, processState) => {
@@ -108,7 +115,6 @@ const handleProcessState = (elements, processState) => {
       elements.input.value = null;
       elements.input.focus();
       elements.feedback.classList.add('text-success');
-      elements.feedback.textContent = i18next.t('success');
       elements.button.disabled = false;
       elements.input.removeAttribute('readonly');
       break;
@@ -127,11 +133,6 @@ const handleProcessState = (elements, processState) => {
       elements.input.removeAttribute('readonly');
       break;
 
-    case true:
-      renderContainer(elements.containerFeeds, 'feeds');
-      renderContainer(elements.containerPosts, 'posts');
-      break;
-
     default:
       break;
   }
@@ -143,24 +144,24 @@ const handler = (elements) => (path, value, preValue) => {
       handleProcessState(elements, value);
       break;
 
-    case 'form.error':
-      renderError(elements, value);
+    case 'form.message':
+      renderMessage(elements, value);
       break;
 
-    case 'feeds.init':
-      handleProcessState(elements, value);
+    case 'feeds':
+      renderFeeds(elements, value, preValue);
       break;
 
-    case 'feeds.channels':
-      renderChannel(elements, value, preValue);
-      break;
-
-    case 'feeds.posts':
+    case 'posts':
       renderPosts(elements, value, preValue);
       break;
 
-    case 'feeds.modal':
+    case 'uiState.modal':
       renderModal(elements, value);
+      break;
+
+    case 'uiState.accordion':
+      renderReaded(value);
       break;
 
     default:

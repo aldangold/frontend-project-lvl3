@@ -10,13 +10,13 @@ import 'bootstrap';
 const resources = {
   ru: {
     translation: {
-      errors: {
+      messages: {
         noValid: 'Ссылка должна быть валидным URL',
         notOneOf: 'RSS уже существует',
         dataError: 'Ресурс не содержит валидный RSS',
         networkError: 'Ошибка сети',
+        success: 'RSS успешно загружен',
       },
-      success: 'RSS успешно загружен',
       feeds: 'Фиды',
       posts: 'Потоки',
       review: 'Просмотр',
@@ -26,7 +26,7 @@ const resources = {
 
 const getValidator = () => {
   const schema = yup.string().url('noValid');
-  return (url, feeds) => schema.notOneOf(feeds, 'notOneOf').validateSync(url);
+  return (url, feeds) => schema.notOneOf(feeds, 'notOneOf').validate(url);
 };
 
 const getProxyUrl = (url) => {
@@ -36,72 +36,82 @@ const getProxyUrl = (url) => {
   return proxyUrl.toString();
 };
 
-const createDataFeed = (url, data, state) => {
-  const { feeds } = state;
+const createDataFeed = (url, data) => {
   const id = _.uniqueId();
-  const channel = {
+  return {
     id,
     url,
     title: data.title,
     description: data.description,
   };
+};
 
-  const posts = data.items.map((post) => {
+const createDataPosts = (feedID, data) => {
+  const dataPosts = data.items.reverse().map((post) => {
     const postID = _.uniqueId();
-    const channelID = id;
     const { title, description, link } = post;
     return {
       id: postID,
-      channelID,
+      feedID,
       title,
       description,
       link,
     };
   });
+  return dataPosts;
+};
 
-  feeds.urls.unshift(url);
-  feeds.channels.unshift(channel);
-  feeds.posts.unshift(...posts);
+const createDataReaded = (data) => {
+  const dataReaded = data.map((post) => {
+    const { id } = post;
+    return { postId: id, readed: false };
+  });
+  return dataReaded;
 };
 
 const updateDataPosts = (id, data, state) => {
-  const posts = data.map((post) => {
-    const channelID = id;
-    const { title, description, link } = post;
+  const dataPosts = createDataPosts(id, data);
+  const dataReaded = createDataReaded(dataPosts);
 
-    return {
-      id,
-      channelID,
-      title,
-      description,
-      link,
-    };
-  });
-  state.feeds.posts.unshift(...posts);
+  state.posts.push(...dataPosts);
+  state.uiState.accordion.push(...dataReaded);
 };
 
+const updateTime = 5000;
+
 const updateFeeds = (state) => {
-  const promises = state.feeds.channels.map((channel) => axios.get(getProxyUrl(channel.url))
+  const promises = state.feeds.map((feed) => axios.get(getProxyUrl(feed.url))
     .then((response) => {
-      const { id } = channel;
+      const { id } = feed;
       const newPosts = parser(response.data.contents).items;
-      const oldPosts = state.feeds.posts.filter((p) => p.channelID === id);
+      const oldPosts = state.posts.filter((p) => p.feedID === id);
       const diffPosts = _.differenceWith(
         newPosts, oldPosts, (a, b) => a.title === b.title,
       );
 
       if (diffPosts.length > 0) {
-        updateDataPosts(id, diffPosts, state);
+        const diffData = {
+          items: diffPosts,
+        };
+        updateDataPosts(id, diffData, state);
       }
     })
     .catch((err) => {
-      state.form.error = err;
+      state.form.message = err;
     }));
-  Promise.all(promises).finally(() => setTimeout(() => updateFeeds(state), 5000));
+  Promise.all(promises).finally(() => setTimeout(() => updateFeeds(state), updateTime));
 };
 
-const addFeed = (url, dataFeed, state) => {
-  createDataFeed(url, dataFeed, state);
+const addFeed = (url, data, state) => {
+  const dataFeed = createDataFeed(url, data);
+  const { id } = dataFeed;
+  const dataPosts = createDataPosts(id, data);
+  const dataReaded = createDataReaded(dataPosts);
+
+  state.urls.push(url);
+  state.feeds.push(dataFeed);
+  state.posts.push(...dataPosts);
+  state.uiState.accordion.push(...dataReaded);
 };
 
 export default () => i18next.init({
@@ -113,15 +123,14 @@ export default () => i18next.init({
     const state = {
       form: {
         processState: '',
-        error: null,
+        message: null,
       },
-      feeds: {
-        init: false,
-        urls: [],
-        channels: [],
-        posts: [],
-        readed: [],
+      urls: [],
+      feeds: [],
+      posts: [],
+      uiState: {
         modal: null,
+        accordion: [],
       },
     };
 
@@ -145,38 +154,35 @@ export default () => i18next.init({
       const formData = new FormData(e.target);
       const url = formData.get('url');
 
-      try {
-        validate(url, state.feeds.urls);
-        watchedState.feeds.init = true;
-        watchedState.form.error = null;
+      validate(url, state.urls).then((link) => {
+        watchedState.uiState.containers = 'rendered';
         watchedState.form.processState = 'processing';
+        return axios.get(getProxyUrl(link));
+      }).then((response) => {
+        const data = parser(response.data.contents);
+        addFeed(url, data, watchedState);
 
-        axios.get(getProxyUrl(url))
-          .then((response) => {
-            const dataFeed = parser(response.data.contents);
-            addFeed(url, dataFeed, watchedState);
-
-            watchedState.form.processState = 'success';
-          })
-          .catch((error) => {
-            if (error.isAxiosError) {
-              watchedState.form.error = 'networkError';
-            } else {
-              watchedState.form.error = 'dataError';
-            }
-            watchedState.form.processState = 'error';
-          });
-      } catch (err) {
+        watchedState.form.processState = 'success';
+        watchedState.form.message = 'success';
+      }).catch((err) => {
         watchedState.form.processState = 'error';
-        watchedState.form.error = err.message;
-      }
+        if (err.message === 'Network Error') {
+          watchedState.form.message = 'networkError';
+        } else if (err.name === 'ValidationError') {
+          watchedState.form.message = err.message;
+        } else {
+          watchedState.form.message = 'dataError';
+        }
+      });
     });
 
     elements.containerPosts.addEventListener('click', (e) => {
       const { id } = e.target.dataset;
-      const [reviewPost] = watchedState.feeds.posts.filter((p) => p.id === id);
-      watchedState.feeds.modal = reviewPost;
-      watchedState.feeds.readed.push(id);
+      if (id) {
+        const [reviewPost] = watchedState.posts.filter((p) => p.id === id);
+        watchedState.uiState.modal = reviewPost;
+        watchedState.uiState.accordion.push({ postId: id, readed: true });
+      }
     });
-    setTimeout(() => updateFeeds(watchedState), 5000);
+    updateFeeds(watchedState);
   });
