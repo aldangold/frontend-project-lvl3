@@ -99,7 +99,7 @@ const addFeed = (url, data, state) => {
 };
 
 export default () => i18next.init({
-  lng: 'en',
+  lng: 'ru',
   debug: true,
   resources,
 })
