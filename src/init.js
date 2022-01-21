@@ -5,24 +5,8 @@ import axios from 'axios';
 import _ from 'lodash';
 import handler from './view';
 import parser from './parser';
+import resources from './locales/index';
 import 'bootstrap';
-
-const resources = {
-  ru: {
-    translation: {
-      messages: {
-        noValid: 'Ссылка должна быть валидным URL',
-        notOneOf: 'RSS уже существует',
-        dataError: 'Ресурс не содержит валидный RSS',
-        networkError: 'Ошибка сети',
-        success: 'RSS успешно загружен',
-      },
-      feeds: 'Фиды',
-      posts: 'Потоки',
-      review: 'Просмотр',
-    },
-  },
-};
 
 const getValidator = () => {
   const schema = yup.string().url('noValid');
@@ -115,7 +99,7 @@ const addFeed = (url, data, state) => {
 };
 
 export default () => i18next.init({
-  lng: 'ru',
+  lng: 'en',
   debug: true,
   resources,
 })
