@@ -7,8 +7,17 @@ export default {
       networkError: 'Ошибка сети',
       success: 'RSS успешно загружен',
     },
+    header: 'RSS агрегатор',
+    description: 'Начните читать RSS сегодня! Это легко, это красиво.',
+    example: 'Пример: https://ru.hexlet.io/lessons.rss',
+    input: 'Ссылка RSS',
+    button: 'Добавить',
     feeds: 'Фиды',
     posts: 'Потоки',
     review: 'Просмотр',
+    modal: {
+      read: 'Читать полностью',
+      close: 'Закрыть',
+    },
   },
 };

@@ -1,15 +1,5 @@
 import i18next from 'i18next';
 
-const renderReaded = (data) => {
-  const readedPosts = data.filter((p) => p.readed === true);
-  readedPosts.forEach((item) => {
-    const id = item.postId;
-    const link = document.querySelector(`[data-id="${id}"]`);
-    link.classList.remove('fw-bold');
-    link.classList.add('fw-normal');
-  });
-};
-
 const renderModal = (elements, value) => {
   const {
     title,
@@ -107,6 +97,61 @@ const renderMessage = (elements, message) => {
   elements.feedback.textContent = i18next.t(`messages.${message}`);
 };
 
+const renderReaded = (data) => {
+  const readedPosts = data.filter((p) => p.readed === true);
+  readedPosts.forEach((item) => {
+    const id = item.postId;
+    const link = document.querySelector(`[data-id="${id}"]`);
+    link.classList.remove('fw-bold');
+    link.classList.add('fw-normal');
+  });
+};
+
+const renderDefaultText = () => {
+  const header = document.querySelector('.display-3');
+  const description = document.querySelector('.lead');
+  const example = document.querySelector('.text-muted');
+  const button = document.querySelector('[aria-label="add"]');
+  const readButton = document.querySelector('.full-article');
+  const closeButton = document.querySelector('.btn-secondary');
+  const textInput = document.querySelector('[for="url-input"]');
+  header.textContent = i18next.t('header');
+  description.textContent = i18next.t('description');
+  example.textContent = i18next.t('example');
+  button.textContent = i18next.t('button');
+  readButton.textContent = i18next.t('modal.read');
+  closeButton.textContent = i18next.t('modal.close');
+  textInput.textContent = i18next.t('input');
+};
+
+const changeLanguage = (elements, value, state) => {
+  const {
+    form,
+    feeds,
+    posts,
+    uiState,
+  } = state;
+  const readedPosts = uiState.accordion;
+  // const message = form.message;
+
+  const lngButtons = document.querySelectorAll('.btn-outline-secondary');
+  lngButtons.forEach((button) => button.classList.remove('active'));
+  const activeButton = document.querySelector(`[data-lng="${value}"]`);
+  activeButton.classList.add('active');
+
+  i18next.changeLanguage(value);
+
+  renderDefaultText();
+
+  if (form.message) renderMessage(elements, form.message);
+
+  if (feeds.length > 0) {
+    renderFeeds(elements, feeds);
+    renderPosts(elements, posts);
+    renderReaded(readedPosts);
+  }
+};
+
 const handleProcessState = (elements, processState) => {
   switch (processState) {
     case 'success':
@@ -138,7 +183,7 @@ const handleProcessState = (elements, processState) => {
   }
 };
 
-const handler = (elements) => (path, value, preValue) => {
+const handler = (state, elements) => (path, value) => {
   switch (path) {
     case 'form.processState':
       handleProcessState(elements, value);
@@ -149,11 +194,11 @@ const handler = (elements) => (path, value, preValue) => {
       break;
 
     case 'feeds':
-      renderFeeds(elements, value, preValue);
+      renderFeeds(elements, value);
       break;
 
     case 'posts':
-      renderPosts(elements, value, preValue);
+      renderPosts(elements, value);
       break;
 
     case 'uiState.modal':
@@ -162,6 +207,10 @@ const handler = (elements) => (path, value, preValue) => {
 
     case 'uiState.accordion':
       renderReaded(value);
+      break;
+
+    case 'uiState.lng':
+      changeLanguage(elements, value, state);
       break;
 
     default:

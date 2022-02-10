@@ -62,6 +62,7 @@ const updateDataPosts = (id, data, state) => {
 };
 
 const updateTime = 5000;
+const defaultLanguage = 'ru';
 
 const updateFeeds = (state) => {
   const promises = state.feeds.map((feed) => axios.get(getProxyUrl(feed.url))
@@ -99,7 +100,7 @@ const addFeed = (url, data, state) => {
 };
 
 export default () => i18next.init({
-  lng: 'ru',
+  lng: defaultLanguage,
   debug: true,
   resources,
 })
@@ -115,6 +116,7 @@ export default () => i18next.init({
       uiState: {
         modal: null,
         accordion: [],
+        lng: defaultLanguage,
       },
     };
 
@@ -128,9 +130,10 @@ export default () => i18next.init({
       modalTitle: document.querySelector('.modal-title'),
       modalBody: document.querySelector('.modal-body'),
       fullArticle: document.querySelector('.full-article'),
+      lngButtons: document.querySelector('.btn-group-sm'),
     };
 
-    const watchedState = onChange(state, handler(elements));
+    const watchedState = onChange(state, handler(state, elements));
     const validate = getValidator();
 
     elements.form.addEventListener('submit', (e) => {
@@ -167,6 +170,11 @@ export default () => i18next.init({
         watchedState.uiState.modal = reviewPost;
         watchedState.uiState.accordion.push({ postId: id, readed: true });
       }
+    });
+
+    elements.lngButtons.addEventListener('click', (e) => {
+      const { lng } = e.target.dataset;
+      if (lng) watchedState.uiState.lng = lng;
     });
     updateFeeds(watchedState);
   });
