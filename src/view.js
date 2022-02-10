@@ -132,7 +132,6 @@ const changeLanguage = (elements, value, state) => {
     uiState,
   } = state;
   const readedPosts = uiState.accordion;
-  // const message = form.message;
 
   const lngButtons = document.querySelectorAll('.btn-outline-secondary');
   lngButtons.forEach((button) => button.classList.remove('active'));
