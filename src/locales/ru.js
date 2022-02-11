@@ -13,7 +13,7 @@ export default {
     input: 'Ссылка RSS',
     button: 'Добавить',
     feeds: 'Фиды',
-    posts: 'Потоки',
+    posts: 'Посты',
     review: 'Просмотр',
     modal: {
       read: 'Читать полностью',
