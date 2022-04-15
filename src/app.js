@@ -164,6 +164,7 @@ export default () => i18next.init({
     });
 
     elements.containerPosts.addEventListener('click', (e) => {
+      e.preventDefault();
       const { id } = e.target.dataset;
       if (id) {
         const [reviewPost] = watchedState.posts.filter((p) => p.id === id);
@@ -173,6 +174,7 @@ export default () => i18next.init({
     });
 
     elements.lngButtons.addEventListener('click', (e) => {
+      e.preventDefault();
       const { lng } = e.target.dataset;
       if (lng) watchedState.uiState.lng = lng;
     });
