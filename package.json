@@ -2,8 +2,13 @@
   "name": "@hexlet/code",
   "version": "1.0.0",
   "description": "RSS reader",
+  "type": "module",
   "scripts": {
-    "test": "jest --colors"
+    "build": "webpack --mode=production --node-env=production",
+    "build:dev": "webpack --mode=development",
+    "build:prod": "webpack --mode=production --node-env=production",
+    "watch": "webpack --watch",
+    "serve": "webpack serve"
   },
   "repository": {
     "type": "git",
@@ -20,7 +25,7 @@
     "url": "https://github.com/aldangold/frontend-project-lvl3/issues"
   },
   "homepage": "https://github.com/aldangold/frontend-project-lvl3#readme",
-  "main": "src/init.js",
+  "main": "src/app.js",
   "devDependencies": {
     "@babel/cli": "^7.16.7",
     "@babel/core": "^7.16.7",

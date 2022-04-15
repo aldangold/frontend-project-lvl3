@@ -3,9 +3,9 @@ import i18next from 'i18next';
 import onChange from 'on-change';
 import axios from 'axios';
 import _ from 'lodash';
-import handler from './view';
-import parser from './parser';
-import resources from './locales/index';
+import handler from './view.js';
+import parser from './parser.js';
+import resources from './locales/index.js';
 import 'bootstrap';
 
 const getValidator = () => {
@@ -14,7 +14,7 @@ const getValidator = () => {
 };
 
 const getProxyUrl = (url) => {
-  const proxyUrl = new URL('/get', 'https://hexlet-allorigins.herokuapp.com');
+  const proxyUrl = new URL('/get', 'https://allorigins.hexlet.app');
   proxyUrl.searchParams.set('disableCache', 'true');
   proxyUrl.searchParams.set('url', url);
   return proxyUrl.toString();
